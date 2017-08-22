@@ -87,9 +87,12 @@ coordY = 0;
 $(document).on('keydown', function(e) {
 	//console.log(e.keyCode);
 	coordinateAdjustment(e.keyCode);
+	movePlayer();
 });
 
+/*
 canvasCtx.fillStyle = "rgb(129, 159, 165)";
+
 
 //player movement is event based...doesn't need interval loop to keep redrawing the same unmoved position
 // it seems interval loop is for other object in the game that move on their own..outside user event control
@@ -100,8 +103,33 @@ stopIntId = setInterval(function() {
 	//coordX++;
 	//coordY++;
 
-	/*if(outOfBounds(coordX, coordY)) {
-		stopIntervalWork();
-	}*/
+	//if(outOfBounds(coordX, coordY)) {
+		//stopIntervalWork();
+	//}
 
-}, 1000/30);
+}, 1000/30);*/
+/*
+var playerObj = function() {
+	this.coord = {x: 0, y: 0};
+	this.color = "rgb(129, 159, 165)";
+	this.height = 10;
+	this.width = 10;
+};
+
+playerObj.prototype.updateCoord = function(keyCode) {
+	//
+};
+
+playerObj.prototype.display = function() {
+	canvasCtx.fillStyle = "rgb(129, 159, 165)";
+	canvasCtx.fillRect(this.coord.x, this.coord.y, this.width, this.height);
+};*/
+
+
+var movePlayer = function() {
+	canvasCtx.fillStyle = "rgb(129, 159, 165)";
+	canvasCtx.clearRect(0, 0, canvas.attr('width'), canvas.attr('height'));
+	canvasCtx.fillRect(coordX, coordY, 10, 10);
+};
+
+movePlayer();
