@@ -1,44 +1,4 @@
-
-// coordinates adjustments requires acces to those (global) variables....maybe time to think about structure
-var coordinateAdjustment = function(keyCode) {
-	var possibleX, possibleY;
-
-	possibleX = coordX;
-	possibleY = coordY;
-	//direction arrows and their code
-	if(keyCode == 38) {
-		//up key
-		possibleY = possibleY - 1;
-		//check that the posible change is within bounds, if so adjust. if not leave it alone
-		if(!(outOfBounds(possibleX, possibleY))) {
-			coordY = coordY - 1;
-		}
-	}
-	if(keyCode == 40) {
-		//down key
-		possibleY = possibleY + 1;
-		//check that the posible change is within bounds, if so adjust. if not leave it alone
-		if(!(outOfBounds(possibleX, possibleY))) {
-			coordY = coordY + 1;
-		}
-	}
-	if(keyCode == 37) {
-		//left key
-		possibleX = possibleX - 1;
-		//check that the posible change is within bounds, if so adjust. if not leave it alone
-		if(!(outOfBounds(possibleX, possibleY))) {
-			coordX = coordX - 1;
-		}
-	}
-	if(keyCode == 39) {
-		//right key
-		possibleX = possibleX + 1;
-		//check that the posible change is within bounds, if so adjust. if not leave it alone
-		if(!(outOfBounds(possibleX, possibleY))) {
-			coordX = coordX + 1;
-		}
-	}
-};
+var canvasCtx, stopIntId;
 
 var canvas = $('<canvas></canvas>', {
 	attr: {
@@ -58,37 +18,91 @@ if(canvas.get(0).getContext) {
 else {
 	canvas.html("Canvas may not be supported");
 }
+//-------------------------------------------------------------------------------------------------------------------------------
+var playerObj = function() {
+	this.coord = {x: 0, y: 0};
+	this.color = "rgb(129, 159, 165)";
+	this.height = 10;
+	this.width = 10;
+};
 
-var canvasCtx, coordX, coordY, stopIntId;
-
-// problem is I must have access to the player object which is a fillRect...not an view element, its just paint pretty much
-// player object viewable rep is more of coordinates and must also include the width and height of its fillRect dimensions
-var outOfBounds = function(coordX, coordY) {
+playerObj.prototype.outOfBounds = function(x, y) {
 	var endPtX, endPtY;
 
 	// 10 is hard coded...need to improve this
-	endPtX = coordX + 10;
-	endPtY = coordY + 10;
+	endPtX = x + this.width;
+	endPtY = y + this.height;
 
-	//var outOfBounds = (coordX > canvas.attr('width')) || (coordX < 0) || (coordY > canvas.attr('height')) || (coordY < 0);
-	var outOfBounds = coordX < 0 || (endPtX > canvas.attr('width')) || coordY < 0 || (endPtY > canvas.attr('height'));
+	var outOfBounds = x < 0 || (endPtX > canvas.attr('width')) || y < 0 || (endPtY > canvas.attr('height'));
+
 	console.log(outOfBounds);
 	return outOfBounds;
 };
 
-var stopIntervalWork = function() {
-	console.log('stopped the interval');
-	clearInterval(stopIntId);
+playerObj.prototype.updateCoord = function(keyCode) {
+	var possibleX, possibleY;
+
+	possibleX = this.coord.x;
+	possibleY = this.coord.y;
+	//direction arrows and their code
+	if(keyCode == 38) {
+		//up key
+		possibleY = possibleY - 1;
+		//check that the posible change is within bounds, if so adjust. if not leave it alone
+		if(!(this.outOfBounds(possibleX, possibleY))) {
+			this.coord.y = this.coord.y - 1;
+		}
+	}
+	if(keyCode == 40) {
+		//down key
+		possibleY = possibleY + 1;
+		//check that the posible change is within bounds, if so adjust. if not leave it alone
+		if(!(this.outOfBounds(possibleX, possibleY))) {
+			this.coord.y = this.coord.y + 1;
+		}
+	}
+	if(keyCode == 37) {
+		//left key
+		possibleX = possibleX - 1;
+		//check that the posible change is within bounds, if so adjust. if not leave it alone
+		if(!(this.outOfBounds(possibleX, possibleY))) {
+			this.coord.x = this.coord.x - 1;
+		}
+	}
+	if(keyCode == 39) {
+		//right key
+		possibleX = possibleX + 1;
+		//check that the posible change is within bounds, if so adjust. if not leave it alone
+		if(!(this.outOfBounds(possibleX, possibleY))) {
+			this.coord.x = this.coord.x + 1;
+		}
+	}
 };
 
-coordX = 0;
-coordY = 0;
+playerObj.prototype.display = function() {
+	canvasCtx.fillStyle = this.color;
+	canvasCtx.fillRect(this.coord.x, this.coord.y, this.width, this.height);
+};
 
+//-------------------------------------------------------------------------------------------------------------------------------
+
+var player = new playerObj();
+player.display();
+
+// canvas rendering is fully dependent on the user keydown event...everything user can control
 $(document).on('keydown', function(e) {
 	//console.log(e.keyCode);
-	coordinateAdjustment(e.keyCode);
-	movePlayer();
+	canvasCtx.clearRect(0, 0, canvas.attr('width'), canvas.attr('height'));
+	//attached to specific instance...not good practice
+	player.updateCoord(e.keyCode);
+	player.display();
+
 });
+
+/*var stopIntervalWork = function() {
+	console.log('stopped the interval');
+	clearInterval(stopIntId);
+};*/
 
 /*
 canvasCtx.fillStyle = "rgb(129, 159, 165)";
@@ -108,28 +122,5 @@ stopIntId = setInterval(function() {
 	//}
 
 }, 1000/30);*/
-/*
-var playerObj = function() {
-	this.coord = {x: 0, y: 0};
-	this.color = "rgb(129, 159, 165)";
-	this.height = 10;
-	this.width = 10;
-};
-
-playerObj.prototype.updateCoord = function(keyCode) {
-	//
-};
-
-playerObj.prototype.display = function() {
-	canvasCtx.fillStyle = "rgb(129, 159, 165)";
-	canvasCtx.fillRect(this.coord.x, this.coord.y, this.width, this.height);
-};*/
 
 
-var movePlayer = function() {
-	canvasCtx.fillStyle = "rgb(129, 159, 165)";
-	canvasCtx.clearRect(0, 0, canvas.attr('width'), canvas.attr('height'));
-	canvasCtx.fillRect(coordX, coordY, 10, 10);
-};
-
-movePlayer();
